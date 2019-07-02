@@ -16,8 +16,12 @@ var status struct {
 	LastUpdate time.Time `json:"last_update"`
 }
 
-var serveAddr = *flag.String("addr", ":80", "the address to listen on")
-var updateFreqMinutes = *flag.Duration("duration", time.Minute*1, "the duration between two detects, in minutes")
+var serveAddr = flag.String("addr", ":80", "the address to listen on")
+var updateFreqMinutes = flag.Duration("duration", time.Minute*1, "the duration between two detects, in minutes")
+
+func init() {
+	flag.Parse()
+}
 
 func main() {
 	checkConfiguration()
@@ -33,13 +37,13 @@ func initStatus() {
 }
 
 func checkConfiguration() {
-	if updateFreqMinutes >= 365*24*60*time.Minute {
+	if *updateFreqMinutes >= 365*24*60*time.Minute {
 		log.Fatalln("The specified duration is too long!")
 	}
 }
 
 func startCheckerServer() {
-	for now := range time.Tick(updateFreqMinutes) {
+	for now := range time.Tick(*updateFreqMinutes) {
 		log.Printf("Checking network status.")
 		checkHttpConnection()
 		status.LastUpdate = now
@@ -76,7 +80,7 @@ func startHttpServer() {
 		_ = encoder.Encode(status)
 	})
 
-	if http.ListenAndServe(serveAddr, nil) != nil {
-		log.Fatalf("Unable to listen on address `%s`.\n", serveAddr)
+	if http.ListenAndServe(*serveAddr, nil) != nil {
+		log.Fatalf("Unable to listen on address `%s`.\n", *serveAddr)
 	}
 }
