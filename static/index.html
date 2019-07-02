@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>先锋服务器水表</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="先锋服务器水表，一个查询先锋网服务器探针状态的网页。"/>
+    <meta name="keywords" content="东北大学,先锋网络中心,服务器,探针"/>
+    <meta name="generator" content="NEUP Server Watermeter">
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="meta-apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <link rel="apple-touch-icon" sizes="57x57" href="/assets/apple-touch-icon-57x57.png"/>
+    <link rel="apple-touch-icon" sizes="72x72" href="/assets/apple-touch-icon-72x72.png"/>
+    <link rel="apple-touch-icon" sizes="114x114" href="/assets/apple-touch-icon-114x114.png"/>
+    <link rel="icon" href="assets/apple-touch-icon-114x114.png" sizes="114x114"/>
+
+    <meta name="format-detection" content="telephone=no"/>
+    <style type="text/css">
+        body {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .container {
+            margin: auto;
+        }
+
+        a {
+            color: aquamarine;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>服务器水表</h2>
+    <ul>
+        <li>状态：<span id="ok">(...)</span></li>
+        <li>信息：<span id="msg">(...)</span></li>
+        <li>探针更新时间：<span id="time">(...)</span></li>
+        <li>本地更新时间：<span id="timeLocal">(...)</span></li>
+    </ul>
+
+    <hr/>
+
+    <small>&copy; 2019 <a href="https://github.com/NEUP-Net-Depart/" target="_blank">NEUP Net Department</a>.</small>
+</div>
+</body>
+<script type="application/javascript">
+    let ok = document.getElementById("ok");
+    let msg = document.getElementById("msg");
+    let time = document.getElementById("time");
+    let timeLocal = document.getElementById("timeLocal");
+
+    function fetchInfo() {
+        fetch("/api/status").then(res => res.json()).then(json => {
+            ok.innerText = json['ok'] ? "成功" : "失败";
+            msg.innerText = json['msg'];
+            timeLocal.innerText = new Date().toLocaleString();
+            time.innerText = new Date(json['last_update']).toLocaleString();
+        })
+    }
+
+    if (!window.fetch) {
+        alert("您的浏览器不支持 fetch 方法，无法正常查看本页面！");
+    } else {
+        window.setInterval(fetchInfo, 5000);
+        fetchInfo();
+    }
+</script>
+</html>
